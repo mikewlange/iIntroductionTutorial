@@ -69,7 +69,7 @@ TutorialAnimationOptions TutorialAnimationOptionsMake(CGPoint fromPoint, CGPoint
     if (!tutorialHandler) {
         tutorialHandler = [self new];
         [tutorialHandler loadTutorialView];
-        [iStatusNotifier setDuration:100];
+        [iStatusNotifier setDuration:30];
         [[[iStatusNotifier sharedInstance] lblMessage] setBackgroundColor:[UIColor colorWithRed:.4 green:.7 blue:1 alpha:1]];
     }
     return tutorialHandler;
