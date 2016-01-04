@@ -13,6 +13,8 @@
 		925414B21C3A33CA005C9BC2 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 925414B01C3A33CA005C9BC2 /* Main.storyboard */; };
 		925414B71C3A33CA005C9BC2 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 925414B51C3A33CA005C9BC2 /* LaunchScreen.storyboard */; };
 		925414BF1C3A3707005C9BC2 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 925414BE1C3A3707005C9BC2 /* Images.xcassets */; };
+		925414C21C3A3A8C005C9BC2 /* iTutorialHandler.m in Sources */ = {isa = PBXBuildFile; fileRef = 925414C11C3A3A8C005C9BC2 /* iTutorialHandler.m */; };
+		925414C51C3A3CE2005C9BC2 /* iStatusNotifier.m in Sources */ = {isa = PBXBuildFile; fileRef = 925414C41C3A3CE2005C9BC2 /* iStatusNotifier.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +28,10 @@
 		925414B61C3A33CA005C9BC2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		925414B81C3A33CA005C9BC2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		925414BE1C3A3707005C9BC2 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		925414C01C3A3A8C005C9BC2 /* iTutorialHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iTutorialHandler.h; sourceTree = "<group>"; };
+		925414C11C3A3A8C005C9BC2 /* iTutorialHandler.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = iTutorialHandler.m; sourceTree = "<group>"; };
+		925414C31C3A3CE2005C9BC2 /* iStatusNotifier.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iStatusNotifier.h; sourceTree = "<group>"; };
+		925414C41C3A3CE2005C9BC2 /* iStatusNotifier.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = iStatusNotifier.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +68,10 @@
 				925414AB1C3A33CA005C9BC2 /* AppDelegate.m */,
 				925414AD1C3A33CA005C9BC2 /* ViewController.h */,
 				925414AE1C3A33CA005C9BC2 /* ViewController.m */,
+				925414C01C3A3A8C005C9BC2 /* iTutorialHandler.h */,
+				925414C11C3A3A8C005C9BC2 /* iTutorialHandler.m */,
+				925414C31C3A3CE2005C9BC2 /* iStatusNotifier.h */,
+				925414C41C3A3CE2005C9BC2 /* iStatusNotifier.m */,
 				925414B01C3A33CA005C9BC2 /* Main.storyboard */,
 				925414BE1C3A3707005C9BC2 /* Images.xcassets */,
 				925414B51C3A33CA005C9BC2 /* LaunchScreen.storyboard */,
@@ -151,6 +161,8 @@
 			files = (
 				925414AF1C3A33CA005C9BC2 /* ViewController.m in Sources */,
 				925414AC1C3A33CA005C9BC2 /* AppDelegate.m in Sources */,
+				925414C51C3A3CE2005C9BC2 /* iStatusNotifier.m in Sources */,
+				925414C21C3A3A8C005C9BC2 /* iTutorialHandler.m in Sources */,
 				925414A91C3A33CA005C9BC2 /* main.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -264,6 +276,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = iIntroductionTutorial/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.myorg.iIntroductionTutorial;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -275,6 +288,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = iIntroductionTutorial/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.4;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.myorg.iIntroductionTutorial;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -300,6 +314,7 @@
 				925414BD1C3A33CA005C9BC2 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
