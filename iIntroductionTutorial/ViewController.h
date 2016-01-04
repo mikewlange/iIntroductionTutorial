@@ -9,9 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "iTutorialHandler.h"
 
-@interface ViewController : UIViewController
-
-@property(nonatomic) TutorialDirectionType TutorialDirectionType;
+@interface ViewController : ITTutorialViewController
 
 @end
 

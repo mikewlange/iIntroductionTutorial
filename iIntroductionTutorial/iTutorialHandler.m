@@ -2,24 +2,54 @@
 //  TutorialHandler.m
 //  Fessup
 //
-//  Created by Rajesh on 4/1/16.
+//  Created by Rajesh on 1/4/16.
 //  Copyright © 2016 Org. All rights reserved.
 //
 
 #import "iTutorialHandler.h"
+#import "iStatusNotifier.h"
+
+
+@interface ITApplication : UIApplication
+
+@end
+
+@implementation ITApplication
+
+- (void)sendEvent:(UIEvent *)event {
+    if (event.type == UIEventTypeTouches) {
+        [TutorialHandler handleTouch];
+    }
+    [super sendEvent:event];
+}
+
+@end
+
+@implementation ITTutorialViewController
+
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    [TutorialHandler handleTouch];
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        if (self.isViewLoaded && self.view.window && self.tutorialDirectionType && [TutorialHandler shouldShowTutorial:self.tutorialDirectionType]) {
+            [TutorialHandler showTutorialForViewController:self];
+        }
+    });
+}
+@end
 
 typedef struct {
-    CGRect fromFrame;
-    CGRect toFrame;
+    CGPoint fromPoint;
+    CGPoint toPoint;
     BOOL isRepeating;
     BOOL shouldReverse;
     NSTimeInterval timeinterval;
 } TutorialAnimationOptions;
 
-TutorialAnimationOptions TutorialAnimationOptionsMake(CGRect fromFrame, CGRect toFrame, BOOL isRepeating, BOOL shouldReverse, NSTimeInterval timeinterval) {
+TutorialAnimationOptions TutorialAnimationOptionsMake(CGPoint fromPoint, CGPoint toPoint, BOOL isRepeating, BOOL shouldReverse, NSTimeInterval timeinterval) {
     TutorialAnimationOptions options;
-    options.fromFrame = fromFrame;
-    options.toFrame = toFrame;
+    options.fromPoint = fromPoint;
+    options.toPoint = toPoint;
     options.isRepeating = isRepeating;
     options.shouldReverse = shouldReverse;
     options.timeinterval = timeinterval;
@@ -39,6 +69,8 @@ TutorialAnimationOptions TutorialAnimationOptionsMake(CGRect fromFrame, CGRect t
     if (!tutorialHandler) {
         tutorialHandler = [self new];
         [tutorialHandler loadTutorialView];
+        [iStatusNotifier setDuration:100];
+        [[[iStatusNotifier sharedInstance] lblMessage] setBackgroundColor:[UIColor colorWithRed:.4 green:.7 blue:1 alpha:1]];
     }
     return tutorialHandler;
 }
@@ -50,23 +82,28 @@ TutorialAnimationOptions TutorialAnimationOptionsMake(CGRect fromFrame, CGRect t
 + (NSString *)keyForType:(TutorialDirectionType)type  {
     NSString *key;
     switch (type) {
-        case kTopDrawer :
-            key = @"kTopDrawer";
+        case kTap :
+            key = @"kTap";
             break;
-        case kMainCanvas :
-            key = @"kMainCanvas";
+        case kToBottom :
+            key = @"kToBottom";
             break;
-        case kPostCellDeck :
-            key = @"kPostCellDeck";
+        case kToTop :
+            key = @"kToTop";
             break;
-        case kExpandedViewCanvas :
-            key = @"kExpandedViewCanvas";
+        case kToLeft :
+            key = @"kToLeft";
             break;
-        case kPullDownToDismiss :
-            key = @"kPullDownToDismiss";
+        case kToRight :
+            key = @"kToRight";
+            break;
+        case kToBottomAndToTop :
+            key = @"kToBottomAndToTop";
+            break;
+        case kToRightAndToLeft :
+            key = @"kToRightAndToLeft";
             break;
         default:
-            key = @"";
             break;
     }
     return key;
@@ -76,63 +113,98 @@ TutorialAnimationOptions TutorialAnimationOptionsMake(CGRect fromFrame, CGRect t
     return ![[NSUserDefaults standardUserDefaults] boolForKey:[self keyForType:type]];
 }
 
-+ (void)showTutorialForViewController:(ViewController *)viewController {
-    [[NSUserDefaults standardUserDefaults] setBool:YES forKey:[self keyForType:(TutorialDirectionType)viewController.TutorialDirectionType]];
++ (void)isTutorialShown:(BOOL)shown type:(TutorialDirectionType) type {
+    [[NSUserDefaults standardUserDefaults] setBool:shown forKey:[self keyForType:type]];
+}
+
++ (void)showTutorialForViewController:(ITTutorialViewController *)viewController {
+    [self isTutorialShown:YES type:(TutorialDirectionType)viewController.tutorialDirectionType];
     NSString *message;
     TutorialHandler *tutorialHandler = [self.class sharedTutorialHandler];
-    [tutorialHandler setIsTutorialShowing:YES];
-    CGRect windowRect = [[UIApplication sharedApplication] keyWindow].bounds;
-    switch (viewController.TutorialDirectionType) {
-        case kTopDrawer : {
-            message = NSLocalizedString(@"swipe_down_to_top_drawer", nil);
-            CGRect fromRect = CGRectMake((windowRect.size.width - 50)/2 , 60, 100, 100);
-            CGRect toRect = CGRectMake((windowRect.size.width - 50)/2 , windowRect.size.height, 100, 100);
-            [tutorialHandler animateViewWithOptions:TutorialAnimationOptionsMake(fromRect, toRect, YES, NO, 1.5)];
+    CGRect windowRect;
+
+    for (UIWindow *aWindow in [UIApplication sharedApplication].windows) {
+        if ([aWindow windowLevel] == UIWindowLevelNormal) {
+            windowRect = aWindow.bounds;
+        }
+    }
+    CGPoint fromPoint;
+    CGPoint toPoint;
+    BOOL isRepeating = YES;
+    BOOL shouldReverse = NO;
+    NSTimeInterval timeinterval;
+    switch (viewController.tutorialDirectionType) {
+        case kTap: {
+            message = NSLocalizedString(@"Tap on indicatied area", nil);
+            fromPoint = CGPointMake((windowRect.size.width - 50)/2 , 60);
+            toPoint = CGPointMake((windowRect.size.width - 50)/2 , 60);
+            timeinterval = .8;
         }
             break;
-        case kMainCanvas : {
-            message = NSLocalizedString(@"swipe_left_or_right_communities", nil);
-            CGRect fromRect = CGRectMake(8, (windowRect.size.height / 3)/2 + 55, 100, 100);
-            CGRect toRect = CGRectMake((windowRect.size.width - 100) , (windowRect.size.height / 3)/2 + 55, 100, 100);
-            [tutorialHandler animateViewWithOptions:TutorialAnimationOptionsMake(fromRect, toRect, YES, YES, 1)];
+        case kToBottom : {
+            message = NSLocalizedString(@"Swipe down", nil);
+            fromPoint = CGPointMake((windowRect.size.width - 50)/2 , 60);
+            toPoint = CGPointMake((windowRect.size.width - 50)/2 , windowRect.size.height);
+            timeinterval = 1.5;
         }
             break;
-        case kPostCellDeck : {
-            message = NSLocalizedString(@"swipe_left_post_cell", nil);
-            CGRect fromRect = CGRectMake((windowRect.size.width - 100) , windowRect.size.height/2 + 55, 100, 100);
-            CGRect toRect = CGRectMake(8, windowRect.size.height/2 + 55, 100, 100);
-            [tutorialHandler animateViewWithOptions:TutorialAnimationOptionsMake(fromRect, toRect, YES, NO, 1)];
+        case kToTop : {
+            message = NSLocalizedString(@"Swipe up", nil);
+            fromPoint = CGPointMake((windowRect.size.width - 50)/2 , windowRect.size.height);
+            toPoint = CGPointMake((windowRect.size.width - 50)/2 , 0);
+            timeinterval = 1.5;
         }
             break;
-        case kExpandedViewCanvas :
-            message = NSLocalizedString(@"swipe_left_or_right_posts", nil);
-            CGRect fromRect = CGRectMake(8, windowRect.size.height/2, 100, 100);
-            CGRect toRect = CGRectMake((windowRect.size.width - 100) , windowRect.size.height/2, 100, 100);
-            [tutorialHandler animateViewWithOptions:TutorialAnimationOptionsMake(fromRect, toRect, YES, YES, 1)];
+        case kToLeft : {
+            message = NSLocalizedString(@"Swipe Left", nil);
+            fromPoint = CGPointMake((windowRect.size.width - 100) , windowRect.size.height/2);
+            toPoint = CGPointMake(8 , windowRect.size.height/2);
+            timeinterval = 1.f;
+        }
             break;
-        case kPullDownToDismiss : {
-            message = NSLocalizedString(@"swipe_down_this_card", nil);
-            CGRect fromRect = CGRectMake((windowRect.size.width - 50)/2 , 60, 100, 100);
-            CGRect toRect = CGRectMake((windowRect.size.width - 50)/2 , windowRect.size.height, 100, 100);
-            [tutorialHandler animateViewWithOptions:TutorialAnimationOptionsMake(fromRect, toRect, YES, NO, 1.5)];
+        case kToRight : {
+            message = NSLocalizedString(@"Swipe Right", nil);
+            fromPoint = CGPointMake(8 , windowRect.size.height/2);
+            toPoint = CGPointMake((windowRect.size.width - 100) , windowRect.size.height/2);
+            timeinterval = 1.f;
+        }
+            break;
+        case kToBottomAndToTop : {
+            message = NSLocalizedString(@"Swipe Up or Down", nil);
+            fromPoint = CGPointMake((windowRect.size.width - 50)/2 , 60);
+            toPoint = CGPointMake((windowRect.size.width - 50)/2 , windowRect.size.height);
+            timeinterval = 1.5;
+            shouldReverse = YES;
+        }
+            break;
+        case kToRightAndToLeft : {
+            message = NSLocalizedString(@"Swipe Right or Left", nil);
+            fromPoint = CGPointMake(8 , windowRect.size.height/2);
+            toPoint = CGPointMake((windowRect.size.width - 100) , windowRect.size.height/2);
+            timeinterval = 1.f;
+            shouldReverse = YES;
         }
             break;
         default:
             break;
     }
+    [tutorialHandler animateViewWithOptions:TutorialAnimationOptionsMake(fromPoint, toPoint, isRepeating, shouldReverse, timeinterval)];
+    [tutorialHandler setIsTutorialShowing:YES];
     [viewController setTutorialDirectionType:0];
-    [Toast showTutorialMessage:message afterExecution:NO completionBlock:^{
+    [iStatusNotifier showStatusBarAlert:message completion:^{
         [self closeTutorialIfVisible];
     }];
 }
 
 + (void)handleTouch {
-    [Toast dismiss];
-    [self closeTutorialIfVisible];
+    if ([[self sharedTutorialHandler] isTutorialShowing]) {
+        [iStatusNotifier dismiss];
+        [self closeTutorialIfVisible];
+    }
 }
 
 + (void)closeTutorialIfVisible {
-    TutorialHandler *tutorialHandler = [self.class sharedTutorialHandler];
+    TutorialHandler *tutorialHandler = [self sharedTutorialHandler];
     if ([tutorialHandler isTutorialShowing]) {
         [tutorialHandler.tutorialView setAlpha:0.0];
         [tutorialHandler setIsTutorialShowing:NO];
@@ -144,22 +216,25 @@ TutorialAnimationOptions TutorialAnimationOptionsMake(CGRect fromFrame, CGRect t
     UIWindow *window = [[UIApplication sharedApplication] keyWindow];
     [window addSubview:_tutorialView];
     
-    UIImageView *imageview = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"ic_pointer"]];
+    UIImageView *imageview = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"pointer"]];
     [imageview setFrame:_tutorialView.bounds];
     [_tutorialView addSubview:imageview];
     [imageview setAutoresizingMask:UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight];
 }
 
 - (void)animateViewWithOptions:(TutorialAnimationOptions)options{
-    [_tutorialView setFrame:options.fromFrame];
+    CGRect fromFrame = CGRectMake(options.fromPoint.x ,options.fromPoint.y, 100, 100);
+    CGRect toFrame = CGRectMake(options.toPoint.x ,options.toPoint.y, 100, 100);
+    
+    [_tutorialView setFrame:fromFrame];
     [_tutorialView setAlpha:.9f];
     [UIView animateWithDuration:options.timeinterval delay:0 options:UIViewAnimationOptionTransitionNone animations:^{
-        [_tutorialView setFrame:options.toFrame];
-        [_tutorialView setAlpha:.1f];
+        [_tutorialView setFrame:toFrame];
+        [_tutorialView setAlpha:.3f];
     }                completion:^(BOOL finished) {
         if (options.isRepeating && [self isTutorialShowing]) {
             if (options.shouldReverse) {
-                [self animateViewWithOptions:TutorialAnimationOptionsMake(options.toFrame, options.fromFrame, options.isRepeating, options.shouldReverse, options.timeinterval)];
+                [self animateViewWithOptions:TutorialAnimationOptionsMake(options.toPoint, options.fromPoint, options.isRepeating, options.shouldReverse, options.timeinterval)];
             } else {
                 [self animateViewWithOptions:options];
             }

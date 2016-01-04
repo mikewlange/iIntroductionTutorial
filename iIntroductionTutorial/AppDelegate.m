@@ -7,6 +7,7 @@
 //
 
 #import "AppDelegate.h"
+#import "iTutorialHandler.h"
 
 @interface AppDelegate ()
 
@@ -17,6 +18,9 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
+    for (TutorialDirectionType type = kTap;type <=kToBottomAndToTop ; type ++ ) {
+        [TutorialHandler isTutorialShown:NO type:type];
+    }
     return YES;
 }
 
